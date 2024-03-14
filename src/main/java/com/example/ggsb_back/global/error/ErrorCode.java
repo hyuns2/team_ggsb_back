@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    INTER_SERVER_ERROR(500, "INTER SERVER ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
+    INTER_SERVER_ERROR(500, "INTER SERVER ERROR", HttpStatus.INTERNAL_SERVER_ERROR),
+    BAD_LOCATION_ERROR(400, "시와 구를 모두 선택해주세요.", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

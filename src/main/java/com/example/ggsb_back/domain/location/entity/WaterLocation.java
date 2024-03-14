@@ -1,16 +1,15 @@
-package com.example.ggsb_back.Entity;
+package com.example.ggsb_back.domain.location.entity;
 
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity
+@Getter
 @Table(name = "WATER_LOCATION")
-@NoArgsConstructor
+@Entity
 public class WaterLocation {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "LOC_ID")
@@ -27,24 +26,4 @@ public class WaterLocation {
 
     @Column(name = "WP_ID")
     private Long WPID;
-
-    public Long getLOCID() {
-        return LOCID;
-    }
-
-    public String getSTATE() {
-        return STATE;
-    }
-
-    public String getCITY() {
-        return CITY;
-    }
-
-    public String getDISTRICT() {
-        return DISTRICT;
-    }
-
-    public Long getWPID() {
-        return WPID;
-    }
 }
