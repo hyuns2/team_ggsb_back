@@ -1,4 +1,4 @@
-package com.example.ggsb_back.Config;
+package com.example.ggsb_back.global.elasticSearch;
 
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;

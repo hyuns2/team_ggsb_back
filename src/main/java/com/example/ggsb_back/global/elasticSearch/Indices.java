@@ -1,4 +1,4 @@
-package com.example.ggsb_back.ES;
+package com.example.ggsb_back.global.elasticSearch;
 
 public class Indices {
     public static final String WATERPURIFICATION_INDEX = "water-test0";

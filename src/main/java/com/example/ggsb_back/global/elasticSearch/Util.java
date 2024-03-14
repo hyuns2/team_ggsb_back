@@ -1,4 +1,4 @@
-package com.example.ggsb_back.ES;
+package com.example.ggsb_back.global.elasticSearch;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
