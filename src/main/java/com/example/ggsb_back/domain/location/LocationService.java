@@ -23,7 +23,7 @@ public class LocationService {
     public CityDto retrieveCity(String state) {
         CityDto dto = new CityDto();
         dto.setState(state);
-        dto.setCity(locationRepository.findCity(state));
+        dto.setCity(locationRepository.findCITYBySTATE(state));
         return dto;
     }
 
@@ -36,7 +36,7 @@ public class LocationService {
     public DistrictDto retrieveDistrict(String city) {
         DistrictDto dto = new DistrictDto();
         dto.setCity(city);
-        dto.setDistrict(locationRepository.findDistrict(city));
+        dto.setDistrict(locationRepository.findDistinctByCITY(city));
         return dto;
     }
 }

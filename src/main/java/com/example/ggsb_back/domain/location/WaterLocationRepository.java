@@ -10,12 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface WaterLocationRepository extends JpaRepository<WaterLocation, Long> {
+    List<String> findCITYBySTATE(String state);
 
-    @Query("select distinct w.CITY from WaterLocation w where w.STATE = ?1 order by w.CITY")
-    List<String> findCity(String state);
-
-    @Query("select distinct w.DISTRICT from WaterLocation w where w.CITY = ?1 order by w.DISTRICT")
-    List<String> findDistrict(String city);
+    List<String> findDistinctByCITY(String city);
 
     Optional<WaterLocation> findByCITYAndDISTRICT(String city, String district);
 
