@@ -6,14 +6,39 @@ import org.elasticsearch.common.util.CollectionUtils;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.stereotype.Component;
 
 
 import java.util.Date;
 import java.util.List;
 
 public final class SearchUtil {
+    private static int DEFAULT_PAGE = 0;
+    private static int DEFAULT_SIZE = 1000;
 
-    private SearchUtil() {}
+    public static SearchRequest buildSearchRequestByDate(final String indexName, final String purification, final String date) {
+        int page = DEFAULT_PAGE;
+        int size = DEFAULT_SIZE;
+        int from = page <= 0 ? 0 : page * size;
+
+        SearchSourceBuilder builder = new SearchSourceBuilder()
+                .from(from)
+                .size(size)
+                .sort("datetime", SortOrder.ASC)
+                .postFilter(getBoolQueryBuilder(purification, date));
+
+        SearchRequest request = new SearchRequest(indexName);
+        request.source(builder);
+
+        return request;
+    }
+
+    private static BoolQueryBuilder getBoolQueryBuilder(final String purification, final String date) {
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(QueryBuilders.termQuery("fcltyMngNm.keyword", purification));
+        boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(date));
+        return boolQueryBuilder;
+    }
 
     public static SearchRequest buildSearchRequest(final String indexName,
                                                    final SearchRequestDTO dto) {
@@ -26,54 +51,6 @@ public final class SearchUtil {
                     .from(from)
                     .size(size)
                     .postFilter(getQueryBuilder(dto));
-
-            if (dto.getSortBy() != null) {
-                builder = builder.sort(
-                        dto.getSortBy(),
-                        dto.getOrder() != null ? dto.getOrder() : SortOrder.ASC
-                );
-            }
-
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
-        } catch (final Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final String field,
-                                                   final Date date) {
-        try {
-            final SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .postFilter(getQueryBuilder(field, date));
-
-            final SearchRequest request = new SearchRequest(indexName);
-            request.source(builder);
-
-            return request;
-        } catch (final Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static SearchRequest buildSearchRequest(final String indexName,
-                                                   final SearchRequestDTO dto,
-                                                   final Date date) {
-        try {
-            final QueryBuilder searchQuery = getQueryBuilder(dto);
-            final QueryBuilder dateQuery = getQueryBuilder("created", date);
-
-            final BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                    .mustNot(searchQuery)
-                    .must(dateQuery);
-
-            SearchSourceBuilder builder = new SearchSourceBuilder()
-                    .postFilter(boolQuery);
 
             if (dto.getSortBy() != null) {
                 builder = builder.sort(

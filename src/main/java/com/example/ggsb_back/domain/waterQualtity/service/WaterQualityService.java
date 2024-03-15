@@ -12,8 +12,14 @@ import com.example.ggsb_back.domain.location.entity.WaterLocation;
 import com.example.ggsb_back.domain.waterPurificationInfo.entity.WaterPurification;
 import com.example.ggsb_back.domain.location.WaterLocationRepository;
 import com.example.ggsb_back.domain.waterPurificationInfo.repository.WaterPurificationRepository;
+import com.example.ggsb_back.global.error.exception.BadLocationException;
+import com.example.ggsb_back.global.error.exception.BadPurificationException;
+import com.example.ggsb_back.global.error.exception.ElasticSearchException;
+import com.example.ggsb_back.global.util.DateUtil;
+import com.example.ggsb_back.global.util.SearchUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -43,121 +49,57 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
-@AllArgsConstructor
 public class WaterQualityService {
-    //@Autowired
-    private WaterLocationRepository locationRepository;
-    //@Autowired
-    private WaterPurificationRepository purificationRepository;
-    private WaterPurificationInfoService waterPurificationInfoService;
-
-    @Resource
-    ElasticsearchOperations elasticsearchOperations;
-
-    private static final Logger LOG = LoggerFactory.getLogger(WaterQualityService.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final WaterLocationRepository locationRepository;
+    private final WaterPurificationRepository purificationRepository;
+    private final WaterPurificationInfoService waterPurificationInfoService;
     private final RestHighLevelClient client;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    /**
+     * 그래프화하기 위해 연속적인 데이터 반환
+     *
+     * @param city 도시
+     * @param district 동네
+     * @param range 0:일간/1:주간/2:월간 검색
+     *
+     * @return WGraphDTO 그래프 정보
+     */
     public WGraphDTO getWGraphDTO(final String city, final String district, final Integer range) {
-        long wp_id = getWP_ID(city, district);
-        WPurificationDTO w_dto = getWpDTO(wp_id);
-
-        assert w_dto != null;
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.sort(SortBuilders.fieldSort("datetime").order(SortOrder.ASC));
-        searchSourceBuilder.size(1000);
-
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(QueryBuilders.termQuery("fcltyMngNm.keyword", w_dto.getWName()));
-
-        Date to = new Date();
-        Date from = new Date();
-
-        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        WaterLocation location = getWL(city, district);
+        WaterPurification purification = getWp(location.getWPID());
 
         List<Double> pHList = new ArrayList<>();
         List<Double> tbList = new ArrayList<>();
         List<Double> clList = new ArrayList<>();
         List<String> dates = new ArrayList<>();
 
+        Date to = new Date();
+        Date from = new Date();
         int one_week = 7;
         int one_month = 28;
-        String toDate = date.format(to);
+        if (range == 0)
+            from.setDate(to.getDate());
+        else if (range == 1)
+            from.setDate(to.getDate() - one_week);
+        else
+            from.setDate(to.getDate() - one_month);
+        String fromDate = DateUtil.DateToString(from);
 
-        SearchRequest request;
+        String index;
+        if (purification.getTYPE() == 0)
+            index = Indices.WATERPURIFICATION_INDEX_0;
+        else
+            index = Indices.WATERPURIFICATION_INDEX_1;
 
-        if (w_dto.getType() == 0) {
-            request = new SearchRequest(Indices.WATERPURIFICATION_INDEX_0);
-            //실시간데이터
-            if (range == 0) {
-                boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(toDate));
-            } else if (range == 1) {
-                from.setDate(to.getDate() - one_week);
-                String fromDate = date.format(from);
-                log.info("fromDate : {}", fromDate);
-                boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(fromDate));
-            } else {
-                from.setDate(to.getDate() - one_month);
-                String fromDate = date.format(from);
-                boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(fromDate));
-            }
-        } else {
-            //일일데이터
-            //주간
-            request = new SearchRequest(Indices.WATERPURIFICATION_INDEX_1);
-            if (range == 1) {
-                from.setDate(to.getDate() - one_week);
-                String fromDate = date.format(from);
-                log.info("fromDate : {}", fromDate);
-                boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(fromDate));
-            }
-            //월간
-            else if (range == 2) {
-                from.setDate(to.getDate() - one_month);
-                String fromDate = date.format(from);
-                boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(fromDate));
-            } else {
-                log.error("range : {}", range);
-                return null;
-            }
-        }
-        return getValue(boolQueryBuilder, searchSourceBuilder, request, city, district, w_dto, pHList, tbList, clList, dates);
-    }
-
-    private WGraphDTO getValue(final BoolQueryBuilder boolQueryBuilder, final SearchSourceBuilder searchSourceBuilder, final SearchRequest request
-            , String city, String district, WPurificationDTO w_dto, List<Double> pHList, List<Double> tbList, List<Double> clList, List<String> dates) {
-        searchSourceBuilder.query(boolQueryBuilder);
-        request.source(searchSourceBuilder);
-
-        try {
-            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-            SearchHits searchHits = response.getHits();
-
-            for (SearchHit hit : searchHits) {
-                WQuality wQuality = MAPPER.readValue(hit.getSourceAsString(), WQuality.class);
-                pHList.add(
-                        checkValue(wQuality.getPhVal())
-                );
-                tbList.add(
-                        checkValue(wQuality.getTbVal())
-                );
-                clList.add(
-                        checkValue(wQuality.getClVal())
-                );
-
-                dates.add(
-                        wQuality.getOccrrncDt()
-                );
-            }
-
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+        SearchRequest request = SearchUtil.buildSearchRequestByDate(index, purification.getWPNAME(), fromDate);
+        getValue(request, pHList, tbList, clList, dates);
         return WGraphDTO.builder()
                 .city(city)
                 .district(district)
-                .waterPurification(w_dto)
+                .waterPurification(new WPurificationDTO(purification.getWPNAME(), purification.getTYPE()))
                 .dates(dates)
                 .pHVals(pHList)
                 .tbVals(tbList)
@@ -165,28 +107,52 @@ public class WaterQualityService {
                 .build();
     }
 
-    private long getWP_ID(String city, String district) {
-        Optional<WaterLocation> l_entity = locationRepository.findByCITYAndDISTRICT(city, district);
-        if (l_entity.isPresent()) {
-            WaterLocation w_loc = l_entity.get();
-            long wp_id = w_loc.getWPID();
-            log.info("wp_id : {}", wp_id);
+    private WaterLocation getWL(String city, String district) {
+        Optional<WaterLocation> result = locationRepository.findByCITYAndDISTRICT(city, district);
 
-            return wp_id;
-        } else return 0;
+        if (result.isEmpty())
+            throw new BadLocationException();
 
+        return result.get();
     }
 
-    private WPurificationDTO getWpDTO(long wp_id) {
-        Optional<WaterPurification> p_entity = purificationRepository.findByWPID(wp_id);
-        if (p_entity.isPresent()) {
-            WaterPurification w_pur = p_entity.get();
+    private WaterPurification getWp(long wpId) {
+        Optional<WaterPurification> result = purificationRepository.findByWPID(wpId);
 
-            return WPurificationDTO.builder()
-                    .wName(w_pur.getWPNAME())
-                    .type(w_pur.getTYPE())
-                    .build();
-        } else return null;
+        if (result.isEmpty())
+            throw new BadPurificationException();
+
+        return result.get();
+    }
+
+    private Double checkValue(String value) {
+        Pattern pt1 = Pattern.compile("^[a-zA-Z]*$"); //영어 체크
+        Pattern pt2 = Pattern.compile("^[가-힣]*$"); //한글 체크
+
+        Matcher matcher1 = pt1.matcher(value);
+        Matcher matcher2 = pt2.matcher(value);
+
+        if (matcher1.find() || matcher2.find())
+            value = "0";
+
+        return Double.parseDouble(value);
+    }
+
+    private void getValue(final SearchRequest request, List<Double> pHList, List<Double> tbList, List<Double> clList, List<String> dates) {
+        try {
+            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+            SearchHits searchHits = response.getHits();
+
+            for (SearchHit hit : searchHits) {
+                WQuality wQuality = MAPPER.readValue(hit.getSourceAsString(), WQuality.class);
+                pHList.add(checkValue(wQuality.getPhVal()));
+                tbList.add(checkValue(wQuality.getTbVal()));
+                clList.add(checkValue(wQuality.getClVal()));
+                dates.add(wQuality.getOccrrncDt());
+            }
+        } catch (Exception e) {
+            throw new ElasticSearchException();
+        }
     }
 
     private WQuality getWQuality_0(final String id) {
@@ -201,7 +167,7 @@ public class WaterQualityService {
 
             return MAPPER.readValue(documentFields.getSourceAsString(), WQuality.class);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
     }
@@ -218,24 +184,9 @@ public class WaterQualityService {
 
             return MAPPER.readValue(documentFields.getSourceAsString(), WQuality.class);
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    private Double checkValue(String value) {
-        Pattern pt1 = Pattern.compile("^[a-zA-Z]*$"); //영어 체크
-        Pattern pt2 = Pattern.compile("^[가-힣]*$"); //한글 체크
-
-        Matcher matcher1 = pt1.matcher(value);
-        Matcher matcher2 = pt2.matcher(value);
-
-        if (matcher1.find() || matcher2.find()) {
-            value = "0";
-            log.info("value: {}", value);
-        }
-        log.info("double.value : {}", Double.parseDouble(value));
-        return Double.parseDouble(value);
     }
 
     private WInfoDTO wInfo(String city, String district, WPurificationDTO dto, WQuality qualityDTO) {
@@ -299,6 +250,30 @@ public class WaterQualityService {
         } else {
             return noWinfo(city, district, dto);
         }
+    }
+
+    private long getWP_ID(String city, String district) {
+        Optional<WaterLocation> l_entity = locationRepository.findByCITYAndDISTRICT(city, district);
+        if (l_entity.isPresent()) {
+            WaterLocation w_loc = l_entity.get();
+            long wp_id = w_loc.getWPID();
+            log.info("wp_id : {}", wp_id);
+
+            return wp_id;
+        } else return 0;
+
+    }
+
+    private WPurificationDTO getWpDTO(long wp_id) {
+        Optional<WaterPurification> p_entity = purificationRepository.findByWPID(wp_id);
+        if (p_entity.isPresent()) {
+            WaterPurification w_pur = p_entity.get();
+
+            return WPurificationDTO.builder()
+                    .wName(w_pur.getWPNAME())
+                    .type(w_pur.getTYPE())
+                    .build();
+        } else return null;
     }
 
     public List<WALLInfoDTO> findWaterQuality(String today, String hour) {

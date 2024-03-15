@@ -3,6 +3,7 @@ package com.example.ggsb_back.domain.waterQualtity.controller;
 import com.example.ggsb_back.domain.waterQualtity.dto.WGraphDTO;
 
 import com.example.ggsb_back.domain.waterQualtity.service.WaterQualityService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,20 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 
 
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/waterquality")
-@Slf4j
 public class WaterQualityController {
     private final WaterQualityService waterQualityService;
-
-    @Autowired
-    public WaterQualityController(WaterQualityService waterQualityService){
-        this.waterQualityService = waterQualityService;
-    }
     @GetMapping("/graph")
-    public WGraphDTO searchWaterGraph(@RequestParam String city,
-                                      @RequestParam String district,
-                                      @RequestParam Integer range)
+    public WGraphDTO searchWaterGraph(@RequestParam String city, @RequestParam String district, @RequestParam Integer range)
     {
         return waterQualityService.getWGraphDTO(city, district, range);
     }
