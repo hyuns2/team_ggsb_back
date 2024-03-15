@@ -1,12 +1,11 @@
-package com.example.ggsb_back.domain.location;
+package com.example.ggsb_back.domain.location.service;
 
+import com.example.ggsb_back.domain.location.repository.WaterLocationRepository;
 import com.example.ggsb_back.domain.location.dto.CityDto;
 import com.example.ggsb_back.domain.location.dto.DistrictDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
