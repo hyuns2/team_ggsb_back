@@ -17,11 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/waterquality")
 public class WaterQualityController {
     private final WaterQualityService waterQualityService;
+    
+    @ResponseBody
     @GetMapping("/graph")
     public WGraphDTO searchWaterGraph(@RequestParam String city, @RequestParam String district, @RequestParam Integer range)
     {
         return waterQualityService.getWGraphDTO(city, district, range);
     }
+
     @GetMapping()
     public ResponseEntity<?> findAllWaterQuality(@RequestParam(required = false) String city,
                                                  @RequestParam(required = false) String district,

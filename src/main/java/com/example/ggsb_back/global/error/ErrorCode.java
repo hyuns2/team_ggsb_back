@@ -7,9 +7,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
-
+    BAD_LOCATION_ERROR(401, "지역 정보를 잘못 입력하셨습니다.", HttpStatus.BAD_REQUEST),
+    BAD_PURIFICATION_ERROR(402, "해당하는 정수장이 없습니다.", HttpStatus.BAD_REQUEST),
+    BAD_RANGE_ERROR(403, "범위 번호를 확인해주세요.", HttpStatus.BAD_REQUEST),
     INTER_SERVER_ERROR(500, "INTER SERVER ERROR", HttpStatus.INTERNAL_SERVER_ERROR),
-    BAD_LOCATION_ERROR(400, "시와 구를 모두 선택해주세요.", HttpStatus.BAD_REQUEST);
+    ELASTIC_SEARCH_ERROR(400, "ELK에 문제가 있습니다.", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

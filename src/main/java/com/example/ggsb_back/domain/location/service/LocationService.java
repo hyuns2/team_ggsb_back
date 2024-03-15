@@ -1,11 +1,13 @@
 package com.example.ggsb_back.domain.location.service;
 
 import com.example.ggsb_back.domain.location.repository.WaterLocationRepository;
-import com.example.ggsb_back.domain.location.dto.CityDto;
-import com.example.ggsb_back.domain.location.dto.DistrictDto;
+import com.example.ggsb_back.domain.location.dto.LocationDto;
+import com.example.ggsb_back.global.error.exception.BadLocationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,11 +21,11 @@ public class LocationService {
      * @param state 검색할 도
      * @return CityDto 모든 도시 리스트 포함된 결과
      */
-    public CityDto retrieveCity(String state) {
-        CityDto dto = new CityDto();
-        dto.setState(state);
-        dto.setCity(locationRepository.findCITYBySTATE(state));
-        return dto;
+    public LocationDto retrieveCity(String state) {
+        List<String> list = locationRepository.findCITYBySTATE(state);
+        if (list.isEmpty())
+            throw new BadLocationException();
+        return new LocationDto(state, list);
     }
 
     /**
@@ -32,10 +34,10 @@ public class LocationService {
      * @param city 검색할 시
      * @return DistrictDto 모든 동네 리스트 포함된 결과
      */
-    public DistrictDto retrieveDistrict(String city) {
-        DistrictDto dto = new DistrictDto();
-        dto.setCity(city);
-        dto.setDistrict(locationRepository.findDistinctByCITY(city));
-        return dto;
+    public LocationDto retrieveDistrict(String city) {
+        List<String> list = locationRepository.findDISTRICTByCITY(city);
+        if (list.isEmpty())
+            throw new BadLocationException();
+        return new LocationDto(city, list);
     }
 }
