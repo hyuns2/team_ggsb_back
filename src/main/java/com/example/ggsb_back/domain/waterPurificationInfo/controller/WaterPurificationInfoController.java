@@ -1,9 +1,9 @@
-package com.example.ggsb_back.Controller;
+package com.example.ggsb_back.domain.waterPurificationInfo.controller;
 
 
-import com.example.ggsb_back.DTO.SearchRequestDTO;
-import com.example.ggsb_back.DTO.WQuality;
-import com.example.ggsb_back.Service.WaterPurificationInfoService;
+import com.example.ggsb_back.domain.waterPurificationInfo.dto.SearchRequestDTO;
+import com.example.ggsb_back.domain.waterQualtity.entity.WQuality;
+import com.example.ggsb_back.domain.waterPurificationInfo.service.WaterPurificationInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

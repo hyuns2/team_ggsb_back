@@ -1,4 +1,4 @@
-package com.example.ggsb_back.Util;
+package com.example.ggsb_back.global.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

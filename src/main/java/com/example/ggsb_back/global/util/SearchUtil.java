@@ -1,6 +1,6 @@
-package com.example.ggsb_back.Util;
+package com.example.ggsb_back.global.util;
 
-import com.example.ggsb_back.DTO.SearchRequestDTO;
+import com.example.ggsb_back.domain.waterPurificationInfo.dto.SearchRequestDTO;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.util.CollectionUtils;
 import org.elasticsearch.index.query.*;

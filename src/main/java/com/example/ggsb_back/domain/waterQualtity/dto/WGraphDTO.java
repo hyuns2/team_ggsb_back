@@ -1,4 +1,4 @@
-package com.example.ggsb_back.DTO.Response;
+package com.example.ggsb_back.domain.waterQualtity.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

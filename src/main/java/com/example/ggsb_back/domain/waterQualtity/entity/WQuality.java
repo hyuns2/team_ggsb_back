@@ -1,4 +1,4 @@
-package com.example.ggsb_back.DTO;
+package com.example.ggsb_back.domain.waterQualtity.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
