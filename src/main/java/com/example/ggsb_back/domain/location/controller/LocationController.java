@@ -1,5 +1,6 @@
-package com.example.ggsb_back.domain.location;
+package com.example.ggsb_back.domain.location.controller;
 
+import com.example.ggsb_back.domain.location.service.LocationService;
 import com.example.ggsb_back.domain.location.dto.CityDto;
 import com.example.ggsb_back.domain.location.dto.DistrictDto;
 import com.example.ggsb_back.global.error.exception.BadLocationException;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor

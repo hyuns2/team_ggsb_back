@@ -1,4 +1,4 @@
-package com.example.ggsb_back.domain.location;
+package com.example.ggsb_back.domain.location.repository;
 
 import com.example.ggsb_back.domain.location.entity.WaterLocation;
 import org.springframework.data.jpa.repository.JpaRepository;
