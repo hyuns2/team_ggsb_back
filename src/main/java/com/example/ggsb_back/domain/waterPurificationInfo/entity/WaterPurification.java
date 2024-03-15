@@ -1,4 +1,4 @@
-package com.example.ggsb_back.Entity;
+package com.example.ggsb_back.domain.waterPurificationInfo.entity;
 
 
 import lombok.NoArgsConstructor;

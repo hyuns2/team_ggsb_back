@@ -1,16 +1,17 @@
-package com.example.ggsb_back.Service;
+package com.example.ggsb_back.domain.waterQualtity.service;
 
-import com.example.ggsb_back.DTO.Response.WALLInfoDTO;
-import com.example.ggsb_back.DTO.Response.WGraphDTO;
-import com.example.ggsb_back.DTO.Response.WInfoDTO;
-import com.example.ggsb_back.DTO.Response.WPurificationDTO;
-import com.example.ggsb_back.DTO.SearchRequestDTO;
-import com.example.ggsb_back.DTO.WQuality;
+import com.example.ggsb_back.domain.waterQualtity.dto.WALLInfoDTO;
+import com.example.ggsb_back.domain.waterQualtity.dto.WGraphDTO;
+import com.example.ggsb_back.domain.waterQualtity.dto.WInfoDTO;
+import com.example.ggsb_back.domain.waterQualtity.dto.WPurificationDTO;
+import com.example.ggsb_back.domain.waterPurificationInfo.dto.SearchRequestDTO;
+import com.example.ggsb_back.domain.waterQualtity.entity.WQuality;
+import com.example.ggsb_back.domain.waterPurificationInfo.service.WaterPurificationInfoService;
 import com.example.ggsb_back.global.elasticSearch.Indices;
 import com.example.ggsb_back.domain.location.entity.WaterLocation;
-import com.example.ggsb_back.Entity.WaterPurification;
+import com.example.ggsb_back.domain.waterPurificationInfo.entity.WaterPurification;
 import com.example.ggsb_back.domain.location.WaterLocationRepository;
-import com.example.ggsb_back.Repository.WaterPurificationRepository;
+import com.example.ggsb_back.domain.waterPurificationInfo.repository.WaterPurificationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

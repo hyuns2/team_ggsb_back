@@ -1,4 +1,4 @@
-package com.example.ggsb_back.DTO;
+package com.example.ggsb_back.domain.waterPurificationInfo.dto;
 
 import lombok.Builder;
 import org.elasticsearch.search.sort.SortOrder;

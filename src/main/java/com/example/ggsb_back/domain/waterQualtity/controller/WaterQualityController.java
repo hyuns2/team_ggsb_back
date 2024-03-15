@@ -1,8 +1,8 @@
-package com.example.ggsb_back.Controller;
+package com.example.ggsb_back.domain.waterQualtity.controller;
 
-import com.example.ggsb_back.DTO.Response.WGraphDTO;
+import com.example.ggsb_back.domain.waterQualtity.dto.WGraphDTO;
 
-import com.example.ggsb_back.Service.WaterQualityService;
+import com.example.ggsb_back.domain.waterQualtity.service.WaterQualityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

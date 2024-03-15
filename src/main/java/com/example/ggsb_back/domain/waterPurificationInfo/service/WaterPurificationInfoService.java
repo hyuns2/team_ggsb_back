@@ -1,10 +1,10 @@
-package com.example.ggsb_back.Service;
+package com.example.ggsb_back.domain.waterPurificationInfo.service;
 
 
-import com.example.ggsb_back.DTO.SearchRequestDTO;
-import com.example.ggsb_back.DTO.WQuality;
+import com.example.ggsb_back.domain.waterPurificationInfo.dto.SearchRequestDTO;
+import com.example.ggsb_back.domain.waterQualtity.entity.WQuality;
 import com.example.ggsb_back.global.elasticSearch.Indices;
-import com.example.ggsb_back.Util.SearchUtil;
+import com.example.ggsb_back.global.util.SearchUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetRequest;

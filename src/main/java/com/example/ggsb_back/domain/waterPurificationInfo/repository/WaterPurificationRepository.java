@@ -1,6 +1,6 @@
-package com.example.ggsb_back.Repository;
+package com.example.ggsb_back.domain.waterPurificationInfo.repository;
 
-import com.example.ggsb_back.Entity.WaterPurification;
+import com.example.ggsb_back.domain.waterPurificationInfo.entity.WaterPurification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
