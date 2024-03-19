@@ -1,6 +1,7 @@
 package com.example.ggsb_back.global.util;
 
 import com.example.ggsb_back.domain.waterPurificationInfo.dto.SearchRequestDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.util.CollectionUtils;
 import org.elasticsearch.index.query.*;
@@ -9,23 +10,29 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Component;
 
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 public final class SearchUtil {
     private static int DEFAULT_PAGE = 0;
     private static int DEFAULT_SIZE = 1000;
 
-    public static SearchRequest buildSearchRequestByDate(final String indexName, final String purification, final String date) {
+    public static SearchRequest buildSearchRequestByDate(final String indexName, final String purification, final String fromDate, final String toDate) {
         int page = DEFAULT_PAGE;
         int size = DEFAULT_SIZE;
         int from = page <= 0 ? 0 : page * size;
+
+        String[] includes = {"fcltyMngNm", "phVal", "tbVal", "clVal", "datetime", "occrrncDt", "dt"};
+        String[] excludes = {"headers", "http_request_failure"};
 
         SearchSourceBuilder builder = new SearchSourceBuilder()
                 .from(from)
                 .size(size)
                 .sort("datetime", SortOrder.ASC)
-                .postFilter(getBoolQueryBuilder(purification, date));
+                .fetchSource(includes, excludes)
+                .postFilter(getBoolQueryBuilder(purification, fromDate, toDate));
 
         SearchRequest request = new SearchRequest(indexName);
         request.source(builder);
@@ -33,10 +40,10 @@ public final class SearchUtil {
         return request;
     }
 
-    private static BoolQueryBuilder getBoolQueryBuilder(final String purification, final String date) {
+    private static BoolQueryBuilder getBoolQueryBuilder(final String purification, final String fromDate, final String toDate) {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery("fcltyMngNm.keyword", purification));
-        boolQueryBuilder.must(QueryBuilders.rangeQuery("datetime").from(date));
+        boolQueryBuilder.filter(QueryBuilders.rangeQuery("datetime").from(fromDate).to(toDate));
         return boolQueryBuilder;
     }
 

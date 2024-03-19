@@ -76,24 +76,19 @@ public class WaterQualityService {
         else
             from.setDate(to.getDate() - one_month);
         String fromDate = DateUtil.DateToString(from);
+        String toDate = DateUtil.DateToString(to);
 
         String index;
-        if (purification.getTYPE() == 0)
+        if (purification.getTYPE() == 1)
             index = Indices.WATERPURIFICATION_INDEX_0;
-        else
+        else if (purification.getTYPE() == 2)
             index = Indices.WATERPURIFICATION_INDEX_1;
+        else {
+            throw new NoInformationException();
+        }
 
-        SearchRequest request = SearchUtil.buildSearchRequestByDate(index, purification.getWPNAME(), fromDate);
-        getValue(request, pHList, tbList, clList, dates);
-        return WGraphDTO.builder()
-                .city(city)
-                .district(district)
-                .waterPurification(new WPurificationDTO(purification.getWPNAME(), purification.getTYPE()))
-                .dates(dates)
-                .pHVals(pHList)
-                .tbVals(tbList)
-                .clVals(clList)
-                .build();
+        SearchRequest request = SearchUtil.buildSearchRequestByDate(index, purification.getWPNAME(), fromDate, toDate);
+        return getValue(location, purification, request, pHList, tbList, clList, dates);
     }
 
     private WaterLocation getWL(String city, String district) {
@@ -127,7 +122,7 @@ public class WaterQualityService {
         return Double.parseDouble(value);
     }
 
-    private void getValue(final SearchRequest request, List<Double> pHList, List<Double> tbList, List<Double> clList, List<String> dates) {
+    private WGraphDTO getValue(final WaterLocation location, final WaterPurification purification, final SearchRequest request, List<Double> pHList, List<Double> tbList, List<Double> clList, List<String> dates) {
         try {
             SearchResponse response = client.search(request, RequestOptions.DEFAULT);
             SearchHits searchHits = response.getHits();
@@ -142,6 +137,15 @@ public class WaterQualityService {
         } catch (Exception e) {
             throw new ElasticSearchException();
         }
+        return WGraphDTO.builder()
+                .city(location.getCITY())
+                .district(location.getDISTRICT())
+                .waterPurification(new WPurificationDTO(purification.getWPNAME(), purification.getTYPE()))
+                .dates(dates)
+                .pHVals(pHList)
+                .tbVals(tbList)
+                .clVals(clList)
+                .build();
     }
 
     private WQuality getWQuality_0(final String id) {
