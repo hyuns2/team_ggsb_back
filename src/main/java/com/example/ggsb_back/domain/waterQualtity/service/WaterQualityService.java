@@ -12,9 +12,7 @@ import com.example.ggsb_back.domain.location.entity.WaterLocation;
 import com.example.ggsb_back.domain.waterPurificationInfo.entity.WaterPurification;
 import com.example.ggsb_back.domain.location.repository.WaterLocationRepository;
 import com.example.ggsb_back.domain.waterPurificationInfo.repository.WaterPurificationRepository;
-import com.example.ggsb_back.global.error.exception.BadLocationException;
-import com.example.ggsb_back.global.error.exception.BadPurificationException;
-import com.example.ggsb_back.global.error.exception.ElasticSearchException;
+import com.example.ggsb_back.global.error.exception.*;
 import com.example.ggsb_back.global.util.DateUtil;
 import com.example.ggsb_back.global.util.SearchUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,8 +71,10 @@ public class WaterQualityService {
             from.setDate(to.getDate());
         else if (range == 1)
             from.setDate(to.getDate() - one_week);
-        else
+        else if (range == 2)
             from.setDate(to.getDate() - one_month);
+        else
+            throw new BadRangeException();
         String fromDate = DateUtil.DateToString(from);
         String toDate = DateUtil.DateToString(to);
 
@@ -83,9 +83,8 @@ public class WaterQualityService {
             index = Indices.WATERPURIFICATION_INDEX_0;
         else if (purification.getTYPE() == 2)
             index = Indices.WATERPURIFICATION_INDEX_1;
-        else {
+        else
             throw new NoInformationException();
-        }
 
         SearchRequest request = SearchUtil.buildSearchRequestByDate(index, purification.getWPNAME(), fromDate, toDate);
         return getValue(location, purification, request, pHList, tbList, clList, dates);
